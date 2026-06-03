@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UzGenie — AI Yordamchi</title>
+  <meta name="description" content="UzGenie — bepul Telegram AI yordamchi. AI Chat, rasm yaratish, ovoz, tarjima va ko'p narsa.">
+  <style>
+    :root {
+      --bg:   #070b14;
+      --bg2:  #0d1424;
+      --bg3:  #141e35;
+      --text: #e8eef8;
+      --muted:#7a8ba8;
+      --a1:   #2ca5e0;
+      --a2:   #7b5cf0;
+      --grad: linear-gradient(135deg, #2ca5e0, #7b5cf0);
+      --r:    14px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius:6px; }
+
+    /* ── HEADER ─── */
+    header {
+      position: fixed; top:0; left:0; right:0;
+      z-index: 100;
+      background: rgba(7,11,20,.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      height: 60px;
+      display: flex; align-items: center;
+    }
+    .header-inner {
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 20px;
+      width: 100%;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .logo-mark {
+      width:36px; height:36px; border-radius:10px;
+      background: var(--grad);
+      display:flex; align-items:center; justify-content:center;
+      font-size:20px;
+    }
+    .logo-name {
+      font-size:19px; font-weight:800; color:var(--text);
+      letter-spacing:-.5px;
+    }
+    .logo-name span { background:var(--grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+
+    nav { display:flex; gap:28px; }
+    nav a {
+      color:var(--muted); text-decoration:none;
+      font-size:14px; font-weight:500;
+      transition:color .2s;
+    }
+    nav a:hover { color:var(--text); }
+
+    .btn {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 20px; border-radius:10px;
+      font-size:14px; font-weight:600;
+      text-decoration:none; cursor:pointer; border:none;
+      transition:all .2s;
+    }
+    .btn-primary {
+      background:var(--grad); color:#fff;
+      box-shadow:0 4px 20px rgba(44,165,224,.25);
+    }
+    .btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 28px rgba(44,165,224,.35); }
+    .btn-outline {
+      background:transparent;
+      border:1.5px solid rgba(255,255,255,.12);
+      color:var(--text);
+    }
+    .btn-outline:hover { border-color:rgba(255,255,255,.25); }
+
+    /* ── HERO ─── */
+    .hero {
+      min-height: 100vh;
+      display:flex; align-items:center;
+      padding: 100px 20px 60px;
+      position:relative; overflow:hidden;
+    }
+    .hero-glow-1 {
+      position:absolute; top:-200px; left:-200px;
+      width:600px; height:600px; border-radius:50%;
+      background:radial-gradient(circle, rgba(44,165,224,.12) 0%, transparent 70%);
+      pointer-events:none;
+    }
+    .hero-glow-2 {
+      position:absolute; bottom:-100px; right:-100px;
+      width:500px; height:500px; border-radius:50%;
+      background:radial-gradient(circle, rgba(123,92,240,.1) 0%, transparent 70%);
+      pointer-events:none;
+    }
+    .hero-inner {
+      max-width:1100px; margin:0 auto; width:100%;
+      display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center;
+    }
+    .hero-badge {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:5px 12px; border-radius:20px;
+      background:rgba(44,165,224,.1); border:1px solid rgba(44,165,224,.25);
+      color:#7dd3f7; font-size:12px; font-weight:600;
+      margin-bottom:20px;
+    }
+    .hero-badge::before { content:'✨'; }
+    h1 {
+      font-size:clamp(32px, 5vw, 54px);
+      font-weight:800; letter-spacing:-1.5px;
+      line-height:1.15;
+      margin-bottom:20px;
+    }
+    h1 .grad { background:var(--grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .hero-sub {
+      font-size:17px; color:var(--muted);
+      line-height:1.7; margin-bottom:32px;
+      max-width:480px;
+    }
+    .hero-btns { display:flex; gap:12px; flex-wrap:wrap; }
+
+    /* Phone mockup */
+    .phone-wrap { display:flex; justify-content:center; align-items:center; }
+    .phone {
+      width:260px;
+      background:var(--bg2);
+      border:1.5px solid rgba(255,255,255,.08);
+      border-radius:36px;
+      padding:20px 16px;
+      box-shadow:0 30px 80px rgba(0,0,0,.5);
+      position:relative;
+    }
+    .phone::before {
+      content:'';
+      position:absolute; top:14px; left:50%; transform:translateX(-50%);
+      width:80px; height:5px; background:var(--bg3); border-radius:5px;
+    }
+    .phone-header {
+      text-align:center; padding:20px 0 12px;
+      font-weight:700; font-size:16px;
+    }
+    .chat-msg {
+      padding:8px 12px; border-radius:12px;
+      font-size:13px; line-height:1.5; margin-bottom:8px;
+      max-width:85%;
+    }
+    .cm-user {
+      background:var(--a1); color:#fff;
+      margin-left:auto; border-radius:12px 12px 2px 12px;
+    }
+    .cm-bot {
+      background:var(--bg3); color:var(--text);
+      border-radius:12px 12px 12px 2px;
+    }
+    .chat-typing {
+      display:flex; gap:4px; align-items:center;
+      padding:8px 12px; background:var(--bg3);
+      border-radius:12px; width:fit-content; margin-top:4px;
+    }
+    .dot {
+      width:6px; height:6px; border-radius:50%;
+      background:var(--muted);
+      animation:bounce .9s infinite;
+    }
+    .dot:nth-child(2) { animation-delay:.15s; }
+    .dot:nth-child(3) { animation-delay:.3s; }
+    @keyframes bounce {
+      0%,60%,100% { transform:translateY(0); }
+      30% { transform:translateY(-5px); }
+    }
+
+    /* ── STATS ─── */
+    .stats {
+      background:var(--bg2);
+      border-top:1px solid rgba(255,255,255,.05);
+      border-bottom:1px solid rgba(255,255,255,.05);
+      padding:32px 20px;
+    }
+    .stats-inner {
+      max-width:1100px; margin:0 auto;
+      display:grid; grid-template-columns:repeat(4,1fr); gap:20px;
+    }
+    .stat { text-align:center; }
+    .stat-num {
+      font-size:28px; font-weight:800;
+      background:var(--grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    }
+    .stat-label { font-size:13px; color:var(--muted); margin-top:4px; }
+
+    /* ── SECTION ─── */
+    section { padding:80px 20px; }
+    .sec-inner { max-width:1100px; margin:0 auto; }
+    .sec-tag {
+      display:inline-flex; align-items:center; gap:6px;
+      background:rgba(44,165,224,.08); border:1px solid rgba(44,165,224,.2);
+      color:var(--a1); font-size:12px; font-weight:700;
+      padding:5px 12px; border-radius:20px; margin-bottom:16px;
+    }
+    h2 {
+      font-size:clamp(26px, 4vw, 40px);
+      font-weight:800; letter-spacing:-1px; margin-bottom:14px;
+    }
+    .sec-sub { font-size:16px; color:var(--muted); max-width:520px; }
+
+    /* ── FEATURES ─── */
+    .features-grid {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:16px;
+      margin-top:48px;
+    }
+    .feat {
+      background:var(--bg2);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:var(--r);
+      padding:24px;
+      position:relative; overflow:hidden;
+      transition:transform .2s, border-color .2s;
+    }
+    .feat:hover { transform:translateY(-3px); border-color:rgba(44,165,224,.2); }
+    .feat::before {
+      content:'';
+      position:absolute; top:0; left:0; right:0; height:2px;
+      background:var(--grad); opacity:0;
+      transition:opacity .2s;
+    }
+    .feat:hover::before { opacity:1; }
+    .feat-icon {
+      width:48px; height:48px; border-radius:14px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:24px; margin-bottom:16px;
+    }
+    .fi-blue   { background:rgba(44,165,224,.15); }
+    .fi-pink   { background:rgba(255,100,150,.15); }
+    .fi-teal   { background:rgba(50,200,180,.15); }
+    .fi-green  { background:rgba(63,185,80,.15); }
+    .fi-orange { background:rgba(255,160,50,.15); }
+    .fi-purp   { background:rgba(123,92,240,.15); }
+
+    .feat h3 { font-size:16px; font-weight:700; margin-bottom:8px; }
+    .feat p  { font-size:14px; color:var(--muted); line-height:1.6; }
+
+    .feat-badge {
+      position:absolute; top:14px; right:14px;
+      padding:2px 8px; border-radius:6px;
+      font-size:10px; font-weight:700;
+    }
+    .fb-free  { background:rgba(63,185,80,.15);  color:#3fb950; }
+    .fb-hot   { background:rgba(255,100,50,.15);  color:#ff6432; }
+
+    /* ── HOW IT WORKS ─── */
+    .how { background:var(--bg2); }
+    .steps-row {
+      display:grid; grid-template-columns:repeat(3,1fr);
+      gap:32px; margin-top:48px; position:relative;
+    }
+    .steps-row::before {
+      content:'';
+      position:absolute; top:28px; left:16.5%; right:16.5%;
+      height:1px;
+      background:linear-gradient(90deg, transparent, rgba(44,165,224,.4), transparent);
+    }
+    .how-step { text-align:center; }
+    .step-circle {
+      width:56px; height:56px; border-radius:50%;
+      background:var(--grad);
+      display:flex; align-items:center; justify-content:center;
+      font-size:22px; margin:0 auto 20px;
+      box-shadow:0 8px 24px rgba(44,165,224,.25);
+    }
+    .how-step h3 { font-size:16px; font-weight:700; margin-bottom:8px; }
+    .how-step p  { font-size:14px; color:var(--muted); }
+
+    /* ── PRICING ─── */
+    .plans {
+      display:grid; grid-template-columns:1fr 1fr; gap:20px;
+      max-width:700px; margin:48px auto 0;
+    }
+    .plan {
+      background:var(--bg2);
+      border:1.5px solid rgba(255,255,255,.07);
+      border-radius:var(--r); padding:28px;
+    }
+    .plan.featured {
+      border-color:rgba(44,165,224,.35);
+      background:linear-gradient(135deg, rgba(44,165,224,.07), rgba(123,92,240,.05));
+      position:relative; overflow:hidden;
+    }
+    .plan.featured::before {
+      content:'Tez orada';
+      position:absolute; top:14px; right:-24px;
+      background:var(--grad); color:#fff;
+      font-size:10px; font-weight:700;
+      padding:3px 28px; transform:rotate(35deg);
+    }
+    .plan-name { font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; margin-bottom:12px; }
+    .plan-price {
+      font-size:36px; font-weight:800;
+      background:var(--grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      margin-bottom:4px;
+    }
+    .plan-period { font-size:13px; color:var(--muted); margin-bottom:20px; }
+    .plan-features { list-style:none; }
+    .plan-features li {
+      font-size:14px; color:var(--muted);
+      padding:7px 0; border-bottom:1px solid rgba(255,255,255,.05);
+      display:flex; align-items:center; gap:8px;
+    }
+    .plan-features li:last-child { border:none; }
+    .plan-features li::before { content:'✓'; color:#3fb950; font-weight:700; flex-shrink:0; }
+    .plan-features li.gray::before { content:'·'; color:var(--muted); }
+
+    /* ── CTA ─── */
+    .cta-section {
+      text-align:center; padding:80px 20px;
+      background:linear-gradient(135deg, rgba(44,165,224,.06), rgba(123,92,240,.06));
+      border-top:1px solid rgba(255,255,255,.05);
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+    .cta-section h2 { margin-bottom:14px; }
+    .cta-section p { color:var(--muted); margin-bottom:32px; font-size:16px; }
+    .cta-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+
+    /* ── FOOTER ─── */
+    footer {
+      padding:40px 20px 30px;
+      border-top:1px solid rgba(255,255,255,.05);
+    }
+    .footer-inner {
+      max-width:1100px; margin:0 auto;
+      display:flex; justify-content:space-between; align-items:center;
+      flex-wrap:wrap; gap:20px;
+    }
+    .footer-logo { display:flex; align-items:center; gap:8px; }
+    .footer-links { display:flex; gap:24px; }
+    .footer-links a { color:var(--muted); text-decoration:none; font-size:14px; transition:color .2s; }
+    .footer-links a:hover { color:var(--text); }
+    .footer-copy { color:var(--muted); font-size:13px; }
+
+    /* ── MOBILE ─── */
+    @media (max-width: 768px) {
+      nav { display:none; }
+      .hero-inner { grid-template-columns:1fr; gap:40px; }
+      .phone-wrap { order:-1; }
+      .phone { width:220px; }
+      .features-grid { grid-template-columns:1fr; }
+      .steps-row { grid-template-columns:1fr; }
+      .steps-row::before { display:none; }
+      .plans { grid-template-columns:1fr; max-width:400px; }
+      .stats-inner { grid-template-columns:repeat(2,1fr); }
+      .footer-inner { flex-direction:column; text-align:center; }
+      .footer-links { flex-wrap:wrap; justify-content:center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <a class="logo" href="#">
+      <div class="logo-mark">🤖</div>
+      <span class="logo-name">Uz<span>Genie</span></span>
+    </a>
+    <nav>
+      <a href="#features">Imkoniyatlar</a>
+      <a href="#how">Qanday ishlaydi</a>
+      <a href="#pricing">Narxlar</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a class="btn btn-primary" href="https://t.me/UzGenie_bot" target="_blank">
+      ✈️ Botni ochish
+    </a>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-glow-1"></div>
+  <div class="hero-glow-2"></div>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge">O'zbek tilidagi birinchi AI yordamchi</div>
+      <h1>
+        Bepul AI.<br>
+        <span class="grad">Cheksiz imkoniyatlar.</span>
+      </h1>
+      <p class="hero-sub">
+        UzGenie — Telegram orqali ishlaydi. AI suhbat, rasm yaratish, tarjima, ovoz, video va ko'p narsa. Bepul.
+      </p>
+      <div class="hero-btns">
+        <a class="btn btn-primary" href="https://t.me/UzGenie_bot" target="_blank">
+          ✈️ Telegram'da ochish
+        </a>
+        <a class="btn btn-outline" href="#features">
+          Imkoniyatlar →
+        </a>
+      </div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="phone-header">🤖 UzGenie</div>
+        <div class="chat-msg cm-user">Salom! Qanday yordam bera olasiz?</div>
+        <div class="chat-msg cm-bot">Salom! Men UzGenie — AI yordamchingizman. Savolingizni yozing...</div>
+        <div class="chat-msg cm-user">Rasm yarat: tog'lar</div>
+        <div class="chat-msg cm-bot">🎨 Rasm tayyorlanmoqda...</div>
+        <div class="chat-typing">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stats-inner">
+    <div class="stat">
+      <div class="stat-num">3+</div>
+      <div class="stat-label">AI Model</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">20</div>
+      <div class="stat-label">TTS tili</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">10</div>
+      <div class="stat-label">Tarjima tili</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Bepul</div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="sec-inner">
+    <div class="sec-tag">✦ Imkoniyatlar</div>
+    <h2>Hamma narsa bitta botda</h2>
+    <p class="sec-sub">Groq, Gemini va GPT-OSS modellari — bepul, tez va ishonchli.</p>
+    <div class="features-grid">
+
+      <div class="feat">
+        <span class="feat-badge fb-free">Bepul</span>
+        <div class="feat-icon fi-blue">🤖</div>
+        <h3>AI Chat</h3>
+        <p>Groq Llama, Gemini 2.5 Flash va GPT-OSS 120B — smart routing bilan eng tez model tanlaydi.</p>
+      </div>
+
+      <div class="feat">
+        <span class="feat-badge fb-hot">Yangi</span>
+        <div class="feat-icon fi-pink">🎨</div>
+        <h3>Rasm yaratish</h3>
+        <p>Flux Realism modeli. O'zbek tilida tavsif yozing — bot avtomatik inglizchaga o'girib yaxshilaydi.</p>
+      </div>
+
+      <div class="feat">
+        <span class="feat-badge fb-free">Bepul</span>
+        <div class="feat-icon fi-teal">🔊</div>
+        <h3>Matn → Ovoz</h3>
+        <p>20 tilda TTS. ElevenLabs yuqori sifat, Edge TTS — cheksiz bepul. O'zbek, rus, ingliz va boshqalar.</p>
+      </div>
+
+      <div class="feat">
+        <span class="feat-badge fb-free">Bepul</span>
+        <div class="feat-icon fi-green">🌐</div>
+        <h3>Tarjima</h3>
+        <p>10 tilda tarjima. O'zbek, rus, ingliz, turk, arab, xitoy, nemis, fransuz, koreys, yapon.</p>
+      </div>
+
+      <div class="feat">
+        <span class="feat-badge fb-free">Bepul</span>
+        <div class="feat-icon fi-orange">⬇️</div>
+        <h3>Video yuklab olish</h3>
+        <p>YouTube va Instagram. 360p, 720p, 1080p formatlar. MP3 ham yuklab olish mumkin.</p>
+      </div>
+
+      <div class="feat">
+        <span class="feat-badge fb-free">Bepul</span>
+        <div class="feat-icon fi-purp">🎤</div>
+        <h3>Ovozli savol</h3>
+        <p>Groq Whisper orqali ovozni matnga aylantiradi. O'zbek tilida gapirsangiz — aniq taniydi.</p>
+      </div>
+
+      <div class="feat">
+        <div class="feat-icon fi-blue">⚽</div>
+        <h3>Sport</h3>
+        <p>Futbol jonli natijalar va F1 yangiliklari. Bugungi o'yinlar, turnirlarda ahvol.</p>
+      </div>
+
+      <div class="feat">
+        <div class="feat-icon fi-orange">💱</div>
+        <h3>Valyuta kursi</h3>
+        <p>O'zbekiston Markaziy banki rasmiy kurslari. Dollar, euro, rubl va boshqa valyutalar.</p>
+      </div>
+
+      <div class="feat">
+        <div class="feat-icon fi-pink">🎵</div>
+        <h3>Musiqa</h3>
+        <p>MP3 qidirish, Top 30 hitlar va Shazam trendlari. Eng yangi qo'shiqlarni bepul toping.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="how">
+  <div class="sec-inner">
+    <div class="sec-tag">✦ Qanday ishlaydi</div>
+    <h2>3 qadam, shuncha</h2>
+    <p class="sec-sub">Ro'yxatdan o'tish oson. Hech qanday to'lov kartasi talab qilinmaydi.</p>
+    <div class="steps-row">
+      <div class="how-step">
+        <div class="step-circle">✈️</div>
+        <h3>Telegram'ni oching</h3>
+        <p>@UzGenie_bot ni toping yoki pastdagi tugmani bosing</p>
+      </div>
+      <div class="how-step">
+        <div class="step-circle">📱</div>
+        <h3>/start bosing</h3>
+        <p>Tilni tanlang va telefon raqamingizni yuboring — tayyor!</p>
+      </div>
+      <div class="how-step">
+        <div class="step-circle">🚀</div>
+        <h3>Ishlatishni boshlang</h3>
+        <p>AI Chat, rasm, ovoz va barcha xususiyatlar bepul ochiladi</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="sec-inner" style="text-align:center">
+    <div class="sec-tag">✦ Narxlar</div>
+    <h2>Hozircha hammasi bepul</h2>
+    <p class="sec-sub" style="margin:0 auto">Premium plan tez orada keladi — hozircha barcha asosiy xususiyatlar tekin.</p>
+    <div class="plans">
+      <div class="plan">
+        <div class="plan-name">Bepul</div>
+        <div class="plan-price">$0</div>
+        <div class="plan-period">/ har doim</div>
+        <ul class="plan-features">
+          <li>AI Chat — cheksiz</li>
+          <li>Rasm yaratish (5 ta/kun)</li>
+          <li>TTS Edge — cheksiz</li>
+          <li>TTS ElevenLabs — 20k belgi/oy</li>
+          <li>Tarjima — cheksiz</li>
+          <li>Video yuklab olish — cheksiz</li>
+          <li>Ovozli savol — cheksiz</li>
+        </ul>
+      </div>
+      <div class="plan featured">
+        <div class="plan-name">Premium 💎</div>
+        <div class="plan-price">Tez orada</div>
+        <div class="plan-period">/ oyiga</div>
+        <ul class="plan-features">
+          <li>Barchasi bepulda bor +</li>
+          <li>Rasm yaratish — cheksiz</li>
+          <li>Ustuvor javob tezligi</li>
+          <li>Kengaytirilgan AI modellari</li>
+          <li class="gray">Yangi xususiyatlar avval</li>
+          <li class="gray">Premium qo'llab-quvvatlash</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="sec-inner" style="max-width:700px; margin:0 auto">
+    <div style="text-align:center; margin-bottom:48px">
+      <div class="sec-tag">✦ FAQ</div>
+      <h2>Ko'p so'raladigan savollar</h2>
+    </div>
+    <div id="faq-list"></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2>Hoziroq sinab ko'ring</h2>
+  <p>Ro'yxatdan o'tish 30 soniya. Hech qanday to'lov kerak emas.</p>
+  <div class="cta-btns">
+    <a class="btn btn-primary" href="https://t.me/UzGenie_bot" target="_blank" style="font-size:16px; padding:14px 28px">
+      ✈️ Telegram'da ochish
+    </a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">
+      <div class="logo-mark" style="width:30px;height:30px;font-size:16px;">🤖</div>
+      <span class="logo-name" style="font-size:16px;">Uz<span>Genie</span></span>
+    </div>
+    <div class="footer-links">
+      <a href="https://t.me/UzGenie_bot" target="_blank">Bot</a>
+      <a href="https://samandar0323.github.io/uzgenie-guide" target="_blank">Ko'rsatma</a>
+      <a href="https://t.me/samandar_gofurov" target="_blank">Admin</a>
+    </div>
+    <div class="footer-copy">© 2026 UzGenie</div>
+  </div>
+</footer>
+
+<script>
+// FAQ data
+const faqs = [
+  { q: 'Bot pullikmi?', a: 'Yo\'q, barcha asosiy xususiyatlar bepul. Premium plan tez orada keladi — hozircha hech narsa to\'lash shart emas.' },
+  { q: 'Qanday ro\'yxatdan o\'taman?', a: 'Telegram\'da @UzGenie_bot ni toping, /start bosing, tilni tanlang va telefon raqamingizni yuboring.' },
+  { q: 'Qaysi AI modellar bor?', a: 'Groq Llama 3.3 70B (eng tez), Gemini 2.5 Flash (Google AI) va GPT-OSS 120B (OpenAI ochiq modeli). Avto rejimda bot o\'zi eng yaxshisini tanlaydi.' },
+  { q: 'Necha tilda gaplashadi?', a: 'Bot o\'zbek, rus va ingliz tillarini yaxshi tushunadi va javob beradi.' },
+  { q: 'Rasm yaratish chegarasi bormi?', a: 'Bepul rejimda kuniga 5 ta rasm. Premium\'da cheksiz.' },
+  { q: 'Video yuklab olishda format?', a: 'YouTube uchun 360p, 720p, 1080p va MP3 formatlarni tanlash mumkin. Instagram Reel va postlar ham yuklanadi.' },
+];
+
+const list = document.getElementById('faq-list');
+faqs.forEach((f, i) => {
+  const el = document.createElement('div');
+  el.style.cssText = 'border-bottom:1px solid rgba(255,255,255,.06);';
+  el.innerHTML = `
+    <button onclick="toggleFaq(${i})" style="width:100%;text-align:left;padding:18px 0;background:none;border:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+      <span style="font-size:15px;font-weight:600;color:#e8eef8;">${f.q}</span>
+      <span id="faq-icon-${i}" style="color:#7a8ba8;font-size:18px;flex-shrink:0;transition:transform .2s;">+</span>
+    </button>
+    <div id="faq-ans-${i}" style="display:none;padding-bottom:16px;font-size:14px;color:#7a8ba8;line-height:1.7;">${f.a}</div>
+  `;
+  list.appendChild(el);
+});
+
+function toggleFaq(i) {
+  const ans  = document.getElementById(`faq-ans-${i}`);
+  const icon = document.getElementById(`faq-icon-${i}`);
+  const open = ans.style.display !== 'none';
+  ans.style.display  = open ? 'none' : 'block';
+  icon.textContent   = open ? '+' : '×';
+  icon.style.transform = open ? '' : 'rotate(45deg)';
+}
+</script>
+</body>
+</html>
